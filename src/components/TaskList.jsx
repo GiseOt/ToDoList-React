@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { getSavedTasks, setSavedTasks } from "../utils/LocalStorage";
+import DeleteModal from "./DeleteModal";
 import { v4 as uuidv4 } from "uuid";
 
 import {
@@ -17,24 +18,42 @@ import {
 import { IoMdAddCircle } from "react-icons/io";
 import Image1 from "../assets/background.png";
 
-
 const TaskList = () => {
-    const [tasks, setTasks] = useState(getSavedTasks());
-    const [newTask, setNewTask] = useState("");
-    const [error, setError] = useState(false);
+	const [tasks, setTasks] = useState(getSavedTasks());
+	const [newTask, setNewTask] = useState("");
+	const [error, setError] = useState(false);
+	const [taskDelete, setTaskDelete] = useState(null);
+    const [deleteModalOpen , setDeleteModalOpen]= useState(false);
 
-    const handleAddTask = () => {
-        if (!newTask.trim()) {
-					setError(true);
-					return;
-				}
-        const updatedTasks = [...tasks, { id: uuidv4() , text : newTask}];
-        setTasks(updatedTasks);
-        setNewTask("");
-        setSavedTasks(updatedTasks);
-        setError(false);
+	const handleAddTask = (e) => {
+		e.preventDefault(); 
+		if (!newTask.trim()) {
+			setError(true);
+			return;
+		}
+		const updatedTasks = [...tasks, { id: uuidv4(), text: newTask }];
+		setTasks(updatedTasks);
+		setNewTask("");
+		setSavedTasks(updatedTasks);
+		setError(false);
+	};
+	const handleDeleteClick = (taskId) => {
+		setTaskDelete(taskId);
+		setDeleteModalOpen(true);
+	};
 
-    }
+	const handleDeleteConfirm = () => {
+		const updatedTaskList = tasks.filter((task) => task.id !== taskDelete);
+		setTasks(updatedTaskList);
+		setSavedTasks(updatedTaskList);
+		setDeleteModalOpen(false);
+		setTaskDelete(null);
+	};
+
+	const handleDeleteCancel = () => {
+		setTaskDelete(null);
+		setDeleteModalOpen(false);
+	};
 	return (
 		<div
 			style={{
@@ -43,7 +62,8 @@ const TaskList = () => {
 				marginTop: "100px",
 			}}
 		>
-			<div
+			<form
+				/* onSubmit={handleAddTask}  */
 				style={{ display: "flex", justifyContent: "center", paddingBlock: 25 }}
 			>
 				<TextField
@@ -56,7 +76,9 @@ const TaskList = () => {
 					onChange={(e) => setNewTask(e.target.value)}
 					required
 				/>
+
 				<IconButton
+					type="submit"
 					aria-label="add"
 					onClick={handleAddTask}
 					sx={{
@@ -68,7 +90,7 @@ const TaskList = () => {
 				>
 					<IoMdAddCircle />
 				</IconButton>
-			</div>
+			</form>
 			<List component="ul">
 				{tasks.map((task) => (
 					<ListItem
@@ -83,12 +105,19 @@ const TaskList = () => {
 						<ListItemSecondaryAction>
 							<ButtonGroup variant="outlined" aria-label="Basic button group">
 								<Button>Edit</Button>
-								<Button>Delete</Button>
+								<Button onClick={() => handleDeleteClick(task.id)}>
+									Delete
+								</Button>
 							</ButtonGroup>
 						</ListItemSecondaryAction>
 					</ListItem>
 				))}
 			</List>
+			<DeleteModal
+				open={deleteModalOpen}
+				onClose={handleDeleteCancel}
+				onDelete={handleDeleteConfirm}
+			/>
 		</div>
 	);
 };
