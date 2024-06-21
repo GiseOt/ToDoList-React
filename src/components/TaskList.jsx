@@ -2,6 +2,7 @@ import { useState } from "react";
 import { getSavedTasks, setSavedTasks } from "../utils/LocalStorage";
 import DeleteModal from "./DeleteModal";
 import { v4 as uuidv4 } from "uuid";
+import EditTask from "./EditTask"; //
 
 import {
 	TextField,
@@ -16,6 +17,8 @@ import {
 	Checkbox,
 } from "@mui/material";
 import { IoMdAddCircle } from "react-icons/io";
+import { MdDelete } from "react-icons/md";
+import { FaEdit } from "react-icons/fa";
 import Image1 from "../assets/background.png";
 
 const TaskList = () => {
@@ -23,10 +26,14 @@ const TaskList = () => {
 	const [newTask, setNewTask] = useState("");
 	const [error, setError] = useState(false);
 	const [taskDelete, setTaskDelete] = useState(null);
-    const [deleteModalOpen , setDeleteModalOpen]= useState(false);
+	const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+	const [isEdit, setIsEdit] = useState(false);
+	const [editingTaskId, setEditingTaskId] = useState(null);
 
+	//Add Task
+    
 	const handleAddTask = (e) => {
-		e.preventDefault(); 
+		e.preventDefault();
 		if (!newTask.trim()) {
 			setError(true);
 			return;
@@ -37,6 +44,9 @@ const TaskList = () => {
 		setSavedTasks(updatedTasks);
 		setError(false);
 	};
+
+	//Delete Task
+
 	const handleDeleteClick = (taskId) => {
 		setTaskDelete(taskId);
 		setDeleteModalOpen(true);
@@ -54,16 +64,33 @@ const TaskList = () => {
 		setTaskDelete(null);
 		setDeleteModalOpen(false);
 	};
+
+	//Edit Task
+
+	const handleEditClick = (taskId) => {
+		setEditingTaskId(taskId);
+		setIsEdit(true);
+	};
+
+	const handleEditConfirm = (newText) => {
+		const updatedTasks = tasks.map((task) =>
+			task.id === editingTaskId ? { ...task, text: newText } : task
+		);
+		setTasks(updatedTasks);
+		setSavedTasks(updatedTasks);
+		setIsEdit(false);
+		setEditingTaskId(null);
+	};
+
 	return (
 		<div
 			style={{
 				backgroundImage: `url(${Image1})`,
-				width: "80%",
+				width: "100%",
 				marginTop: "100px",
 			}}
 		>
 			<form
-				/* onSubmit={handleAddTask}  */
 				style={{ display: "flex", justifyContent: "center", paddingBlock: 25 }}
 			>
 				<TextField
@@ -76,7 +103,6 @@ const TaskList = () => {
 					onChange={(e) => setNewTask(e.target.value)}
 					required
 				/>
-
 				<IconButton
 					type="submit"
 					aria-label="add"
@@ -99,14 +125,24 @@ const TaskList = () => {
 						sx={{ display: "flex", alignItems: "center" }}
 					>
 						<Checkbox color="secondary" />
-						<ListItemText>
-							<Typography variant="body1">{task.text}</Typography>
-						</ListItemText>
+						{isEdit && editingTaskId === task.id ? (
+							<EditTask
+								taskText={task.text}
+								setIsEdit={setIsEdit}
+								handleEditConfirm={handleEditConfirm}
+							/>
+						) : (
+							<ListItemText>
+								<Typography variant="body1">{task.text}</Typography>
+							</ListItemText>
+						)}
 						<ListItemSecondaryAction>
 							<ButtonGroup variant="outlined" aria-label="Basic button group">
-								<Button>Edit</Button>
+								<Button onClick={() => handleEditClick(task.id)}>
+									<FaEdit />
+								</Button>
 								<Button onClick={() => handleDeleteClick(task.id)}>
-									Delete
+									<MdDelete />
 								</Button>
 							</ButtonGroup>
 						</ListItemSecondaryAction>
