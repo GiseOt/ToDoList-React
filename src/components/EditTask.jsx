@@ -1,10 +1,8 @@
 import { Button, ButtonGroup, TextField, Stack } from "@mui/material";
 
 const EditTask = ({ taskText, setIsEdit, handleEditConfirm }) => {
-
-
-    const handleCancelEdit = () => {
-		setIsEdit(false); 
+	const handleCancelEdit = () => {
+		setIsEdit(false);
 	};
 
 	const handleEditTask = (e) => {
