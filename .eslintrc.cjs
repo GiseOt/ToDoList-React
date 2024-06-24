@@ -18,4 +18,9 @@ module.exports = {
       { allowConstantExport: true },
     ],
   },
+"rules": {
+  "react/prop-types": "off",
+  "react/jsx-uses-react": "error",   
+     "react/jsx-uses-vars": "error"
+}
 }
